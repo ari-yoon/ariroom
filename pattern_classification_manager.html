@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;font-size:13px;background:#f5f5f5;color:#333}
+.wrap{padding:24px}
+.page-title{font-size:15px;font-weight:600;margin-bottom:16px}
+.tab-bar{display:flex;border-bottom:2px solid #e0e0e0;margin-bottom:20px}
+.tab{padding:9px 20px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:#888;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.tab:hover{color:#555}
+.tab.active{color:#1a8cff;border-bottom-color:#1a8cff;font-weight:500}
+.filter-box{background:#fff;border:1px solid #e0e0e0;border-radius:4px;padding:16px 20px;margin-bottom:12px}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.filter-row:last-child{margin-bottom:0}
+.filter-label{min-width:70px;color:#555;font-size:13px}
+.radio-group{display:flex;gap:14px;align-items:center}
+.radio-group label{display:flex;align-items:center;gap:4px;cursor:pointer;font-size:13px}
+.radio-group input[type=radio]{accent-color:#1a8cff;cursor:pointer}
+.search-input{height:32px;border:1px solid #d0d0d0;border-radius:3px;padding:0 10px;font-size:13px;outline:none}
+.search-input:focus{border-color:#1a8cff}
+.btn{height:32px;padding:0 14px;border-radius:3px;font-size:13px;cursor:pointer;border:none;font-family:inherit;white-space:nowrap}
+.btn-blue{background:#1a8cff;color:#fff}.btn-blue:hover{background:#0f7ae5}
+.btn-green{background:#52c41a;color:#fff}.btn-green:hover{background:#3dab10}
+.btn-outline{background:#fff;border:1px solid #d0d0d0;color:#333}.btn-outline:hover{background:#f5f5f5}
+.toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.toolbar-left{font-size:13px;color:#555}
+.toolbar-right{display:flex;gap:6px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+thead th{background:#fafafa;padding:9px 12px;text-align:center;font-weight:500;border:1px solid #e8e8e8;white-space:nowrap}
+tbody td{padding:9px 12px;border:1px solid #e8e8e8;text-align:center;vertical-align:middle}
+tbody tr:hover{background:#fafafa}
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:12px}
+.badge-active{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.badge-inactive{background:#f5f5f5;color:#aaa;border:1px solid #d9d9d9}
+.badge-type{background:#e8f0fe;color:#1a5cbf;border:1px solid #c3d5f9;font-size:11px;padding:2px 6px;border-radius:3px}
+.action-link{color:#1a8cff;cursor:pointer;background:none;border:none;font-size:13px;padding:0 2px}
+.empty{text-align:center;padding:40px;color:#aaa}
+
+/* 토글 스위치 */
+.toggle{position:relative;display:inline-block;width:40px;height:22px;cursor:pointer;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#d9d9d9;border-radius:22px;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle input:checked+.toggle-slider{background:#1a8cff}
+.toggle input:checked+.toggle-slider:before{transform:translateX(18px)}
+.toggle-label{font-size:12px;color:#888}
+
+/* 분류 탭 */
+.cls-tab-content{background:#fff;border:1px solid #e0e0e0;border-radius:4px}
+.cls-tab-header{padding:16px 20px;border-bottom:1px solid #f0f0f0}
+.cls-tab-header-title{font-size:13px;font-weight:600}
+.cls-tab-header-desc{font-size:12px;color:#aaa;margin-top:2px}
+.cls-add-row{padding:16px 20px;border-bottom:1px solid #f0f0f0;display:flex;gap:8px;align-items:center;background:#fafcff}
+.cls-add-row input,.cls-add-row select{height:34px;border:1px solid #d0d0d0;border-radius:4px;padding:0 10px;font-size:13px;outline:none;background:#fff}
+.cls-add-row input:focus,.cls-add-row select:focus{border-color:#1a8cff}
+.cls-add-row input{width:220px}
+.cls-add-row select{width:130px}
+.cls-count{padding:10px 20px;font-size:12px;color:#888;border-bottom:1px solid #f5f5f5}
+
+/* 모달 */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:8px;width:520px;max-width:95vw;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #f0f0f0}
+.modal-header-title{font-size:15px;font-weight:600}
+.modal-close{cursor:pointer;font-size:18px;color:#aaa;background:none;border:none;line-height:1}.modal-close:hover{color:#333}
+.modal-body{padding:20px}
+.modal-footer{padding:12px 20px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:8px}
+.form-row{margin-bottom:10px}
+.form-input{width:100%;height:42px;border:1px solid #d9d9d9;border-radius:6px;padding:0 14px;font-size:14px;color:#333;background:#fff;outline:none;transition:border-color .15s}
+.form-input:focus{border-color:#1a8cff;box-shadow:0 0 0 2px rgba(24,144,255,.1)}
+.form-input::placeholder{color:#bbb}
+.form-select-wrap{position:relative}
+.form-select-wrap::after{content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:5px solid #aaa;pointer-events:none}
+.form-select{width:100%;height:42px;border:1px solid #d9d9d9;border-radius:6px;padding:0 36px 0 14px;font-size:14px;color:#333;background:#fff;appearance:none;outline:none;cursor:pointer;transition:border-color .15s}
+.form-select:focus{border-color:#1a8cff;box-shadow:0 0 0 2px rgba(24,144,255,.1)}
+.form-select.ph{color:#bbb}
+.form-select:disabled{background:#f5f5f5;cursor:not-allowed;color:#bbb}
+.divider{border:none;border-top:1px dashed #e8e8e8;margin:6px 0 10px}
+.btn-reg{height:38px;padding:0 20px;border-radius:4px;font-size:13px;background:#1a8cff;color:#fff;border:none;cursor:pointer}.btn-reg:hover{background:#0f7ae5}
+.btn-cancel{height:38px;padding:0 16px;border-radius:4px;font-size:13px;background:#fff;color:#333;border:1px solid #d0d0d0;cursor:pointer}.btn-cancel:hover{background:#f5f5f5}
+.migrate-info{background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:8px 12px;font-size:12px;color:#ad6800;margin-bottom:10px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="page-title">키워드 패턴 관리</div>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('pattern')">패턴 목록</button>
+    <button class="tab" onclick="switchTab('cls')">패턴 유형 관리</button>
+  </div>
+
+  <!-- ── 패턴 목록 탭 ── -->
+  <div id="tabPattern">
+    <div class="filter-box">
+      <div class="filter-row">
+        <span class="filter-label"></span>
+        <input type="text" id="searchInput" class="search-input" style="width:200px" placeholder="패턴" oninput="renderTable()">
+        <button class="btn btn-blue" onclick="renderTable()">검색</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">패턴 그룹</span>
+        <div class="radio-group">
+          <label><input type="radio" name="typeFilter" value="all" checked onchange="renderTable()"> 전체</label>
+          <label><input type="radio" name="typeFilter" value="협조/이슈" onchange="renderTable()"> 협조/이슈</label>
+          <label><input type="radio" name="typeFilter" value="거래금지품목" onchange="renderTable()"> 거래금지품목</label>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">활성화 여부</span>
+        <div class="radio-group">
+          <label><input type="radio" name="statusFilter" value="all" checked onchange="renderTable()"> 전체</label>
+          <label><input type="radio" name="statusFilter" value="active" onchange="renderTable()"> 활성</label>
+          <label><input type="radio" name="statusFilter" value="inactive" onchange="renderTable()"> 비활성</label>
+        </div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">비고</span>
+        <input type="text" id="noteFilter" class="search-input" style="width:320px" oninput="renderTable()">
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-left" id="countLabel"></div>
+      <div class="toolbar-right">
+        <button class="btn btn-blue" onclick="openAddModal()">패턴 추가</button>
+        <button class="btn btn-outline">패턴 일괄 추가</button>
+        <button class="btn btn-green">패턴 일괄 다운로드</button>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:36px"><input type="checkbox" id="checkAll" onchange="toggleAll(this)"></th>
+          <th>ID</th><th>패턴</th><th>패턴 그룹</th><th>패턴 유형</th>
+          <th>매치 유형</th><th>활성화 여부</th><th>비고</th>
+          <th>등록일 / 수정일</th><th>수정 / 삭제</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- ── 패턴 유형 관리 탭 ── -->
+  <div id="tabCls" style="display:none">
+    <div class="cls-tab-content">
+      <div class="cls-tab-header">
+        <div class="cls-tab-header-title">패턴 유형 관리</div>
+        <div class="cls-tab-header-desc">패턴 추가 시 드롭다운에 노출될 유형을 등록합니다. 유형명 수정 시 기존 패턴에 자동 반영됩니다.</div>
+      </div>
+      <div class="cls-add-row">
+        <select id="newClsType">
+          <option value="" disabled selected>그룹 선택</option>
+          <option value="협조/이슈">협조/이슈</option>
+          <option value="거래금지품목">거래금지품목</option>
+        </select>
+        <input id="newClsName" placeholder="유형명을 입력하세요" onkeydown="if(event.key==='Enter')addCls()">
+        <button class="btn btn-blue" onclick="addCls()">+ 유형 추가</button>
+      </div>
+      <div class="cls-count" id="clsCount"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>유형명</th>
+            <th>패턴 그룹</th>
+            <th>활성화</th>
+            <th>등록일</th>
+            <th>수정</th>
+          </tr>
+        </thead>
+        <tbody id="clsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 패턴 추가 모달 ===== -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-header-title">패턴 추가</span>
+      <button class="modal-close" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <input class="form-input" id="addPattern" placeholder="패턴">
+      </div>
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select ph" id="addType" onchange="onGroupChange()">
+            <option value="" disabled selected>패턴 그룹</option>
+            <option>협조/이슈</option>
+            <option>거래금지품목</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select ph" id="addClass" disabled>
+            <option value="" disabled selected>패턴 유형</option>
+          </select>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select ph" id="addMatch" onchange="this.classList.remove('ph')">
+            <option value="" disabled selected>매치 유형</option>
+            <option>일치</option>
+            <option>포함</option>
+            <option>공백제거 포함</option>
+            <option>공백 및 특수문자 제거 후 포함</option>
+            <option>정규식</option>
+            <option>정규식 (공백/특수문자 제거)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select ph" id="addStatus" onchange="this.classList.remove('ph')">
+            <option value="" disabled selected>활성화 여부</option>
+            <option value="active">활성</option>
+            <option value="inactive">비활성</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <input class="form-input" id="addNote" placeholder="비고">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAddModal()">취소</button>
+      <button class="btn-reg" onclick="submitAdd()">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 패턴 수정 모달 ===== -->
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-header-title">패턴 수정</span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-row"><input class="form-input" id="editPattern" placeholder="패턴"></div>
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select" id="editType" onchange="syncEditCls()">
+            <option>협조/이슈</option><option>거래금지품목</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select" id="editClass"></select>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select" id="editMatch">
+            <option>일치</option>
+            <option>포함</option>
+            <option>공백제거 포함</option>
+            <option>공백 및 특수문자 제거 후 포함</option>
+            <option>정규식</option>
+            <option>정규식 (공백/특수문자 제거)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-select-wrap">
+          <select class="form-select" id="editStatus">
+            <option value="active">활성</option><option value="inactive">비활성</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <input class="form-input" id="editNote" placeholder="비고">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeEditModal()">취소</button>
+      <button class="btn-reg" onclick="submitEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 패턴 유형 수정 모달 ===== -->
+<div class="modal-bg" id="clsEditModal">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">
+      <span class="modal-header-title">패턴 유형 수정</span>
+      <button class="modal-close" onclick="closeClsEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="clsEditId">
+      <div class="migrate-info" id="migrateInfo">
+        ⚠ 유형명을 수정하면 해당 유형으로 등록된 기존 패턴에 자동 반영됩니다.
+      </div>
+      <div class="form-row">
+        <input class="form-input" id="clsEditGroup" disabled style="background:#f5f5f5;color:#aaa;cursor:not-allowed">
+      </div>
+      <div class="form-row" style="margin-bottom:0">
+        <input class="form-input" id="clsEditName" placeholder="유형명" oninput="checkMigrateInfo()">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeClsEditModal()">취소</button>
+      <button class="btn-reg" onclick="submitClsEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let classifications=[
+  {id:1,name:'브랜드/언론',type:'협조/이슈',active:true,created:'2024-01-10'},
+  {id:2,name:'불분명한/비인도적 거래',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:3,name:'개인정보거래 (온/오프라인)',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:4,name:'환금성 상품',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:5,name:'전자담배',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:6,name:'의약품',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:7,name:'위해 식품',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:8,name:'주류',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:9,name:'의료기기',type:'거래금지품목',active:true,created:'2024-01-10'},
+  {id:10,name:'성인/도박',type:'거래금지품목',active:true,created:'2024-01-10'},
+];
+let clsNextId=11;
+
+let patterns=[
+  {id:867,pattern:'(임윤찬).*(피아노리사이틀)',type:'협조/이슈',cls:'브랜드/언론',match:'정규식 (공백/특수문자 제거)',status:'active',note:'26.03.26. - 주관사 목프로덕션 협조 요청 (~5/12)',created:'2026-03-27',updated:'2026-03-27'},
+  {id:866,pattern:'쓰레기봉투',type:'거래금지품목',cls:'불분명한/비인도적 거래',match:'공백 및 특수문자 제거 후 포함',status:'active',note:'카테고리 변경 필요',created:'2026-03-27',updated:'2026-03-27'},
+  {id:865,pattern:'(성시경).*(축가콘서티티켓)',type:'협조/이슈',cls:'브랜드/언론',match:'정규식 (공백/특수문자 제거)',status:'active',note:'26.03.26. - 주관사 에스이심칠 협조 요청 (~5/5)',created:'2026-03-26',updated:'2026-03-26'},
+];
+let patNextId=868;
+
+function today(){return new Date().toISOString().slice(0,10)}
+function qs(s){return document.querySelector(s)}
+
+// ── 탭 ──────────────────────────────────────────────────
+function switchTab(tab){
+  document.getElementById('tabPattern').style.display=tab==='pattern'?'':'none';
+  document.getElementById('tabCls').style.display=tab==='cls'?'':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',(i===0&&tab==='pattern')||(i===1&&tab==='cls'));
+  });
+  if(tab==='cls') renderClsTable();
+}
+
+// ── 패턴 테이블 ─────────────────────────────────────────
+function renderTable(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const nq=document.getElementById('noteFilter').value.trim().toLowerCase();
+  const tf=qs('input[name=typeFilter]:checked')?.value||'all';
+  const sf=qs('input[name=statusFilter]:checked')?.value||'all';
+  const rows=patterns.filter(d=>
+    (!q||d.pattern.toLowerCase().includes(q))&&
+    (!nq||d.note.toLowerCase().includes(nq))&&
+    (tf==='all'||d.type===tf)&&(sf==='all'||d.status===sf)
+  );
+  const act=patterns.filter(x=>x.status==='active').length;
+  document.getElementById('countLabel').textContent=`Total: ${patterns.length} (활성: ${act}, 비활성: ${patterns.length-act})`;
+  const tb=document.getElementById('tableBody');
+  if(!rows.length){tb.innerHTML=`<tr><td colspan="10" class="empty">검색 결과가 없습니다.</td></tr>`;return;}
+  tb.innerHTML=rows.map(d=>`
+    <tr>
+      <td><input type="checkbox" class="row-chk" data-id="${d.id}"></td>
+      <td>${d.id}</td>
+      <td style="text-align:left">${d.pattern}</td>
+      <td>${d.type}</td><td>${d.cls}</td>
+      <td style="font-size:12px">${d.match}</td>
+      <td><span class="badge ${d.status==='active'?'badge-active':'badge-inactive'}">${d.status==='active'?'활성':'비활성'}</span></td>
+      <td style="text-align:left;color:#666;font-size:12px;max-width:180px">${d.note||'-'}</td>
+      <td style="color:#aaa;font-size:11px;white-space:nowrap">${d.created}<br>${d.updated}</td>
+      <td>
+        <button class="action-link" onclick="openEditModal(${d.id})">✏</button> /
+        <button class="action-link" style="color:#ff4d4f" onclick="delPattern(${d.id})">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checked=cb.checked)}
+
+// ── 패턴 유형 테이블 ─────────────────────────────────────
+function renderClsTable(){
+  const act=classifications.filter(c=>c.active).length;
+  document.getElementById('clsCount').textContent=`Total: ${classifications.length}개 (활성: ${act}, 비활성: ${classifications.length-act})`;
+  const tb=document.getElementById('clsTableBody');
+  if(!classifications.length){tb.innerHTML=`<tr><td colspan="6" class="empty">등록된 유형이 없습니다.</td></tr>`;return;}
+  tb.innerHTML=classifications.map(c=>`
+    <tr style="${!c.active?'opacity:0.45':''}">
+      <td>${c.id}</td>
+      <td style="text-align:left;font-weight:500">${c.name}</td>
+      <td><span class="badge-type">${c.type}</span></td>
+      <td>
+        <label class="toggle">
+          <input type="checkbox" ${c.active?'checked':''} onchange="toggleCls(${c.id},this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </td>
+      <td style="color:#aaa;font-size:12px">${c.created}</td>
+      <td>
+        <button class="action-link" onclick="openClsEditModal(${c.id})">✏</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── 패턴 유형 토글 ────────────────────────────────────────
+function toggleCls(id, checked){
+  const c=classifications.find(x=>x.id===id);
+  if(!c) return;
+  c.active=checked;
+  renderClsTable();
+}
+
+// ── 패턴 유형 추가 ────────────────────────────────────────
+function addCls(){
+  const name=document.getElementById('newClsName').value.trim();
+  const type=document.getElementById('newClsType').value;
+  if(!type){alert('그룹을 선택하세요.');return;}
+  if(!name){alert('유형명을 입력하세요.');return;}
+  if(classifications.find(c=>c.name===name)){alert('이미 존재하는 유형명입니다.');return;}
+  classifications.push({id:clsNextId++,name,type,active:true,created:today()});
+  document.getElementById('newClsName').value='';
+  document.getElementById('newClsType').selectedIndex=0;
+  renderClsTable();
+}
+
+// ── 패턴 유형 수정 모달 ──────────────────────────────────
+let clsEditOrigName='';
+function openClsEditModal(id){
+  const c=classifications.find(x=>x.id===id);if(!c)return;
+  document.getElementById('clsEditId').value=id;
+  document.getElementById('clsEditGroup').value=c.type;
+  document.getElementById('clsEditName').value=c.name;
+  document.getElementById('migrateInfo').style.display='none';
+  clsEditOrigName=c.name;
+  document.getElementById('clsEditModal').classList.add('open');
+}
+function closeClsEditModal(){
+  document.getElementById('clsEditModal').classList.remove('open');
+}
+function checkMigrateInfo(){
+  const name=document.getElementById('clsEditName').value.trim();
+  const affected=patterns.filter(p=>p.cls===clsEditOrigName).length;
+  document.getElementById('migrateInfo').style.display=
+    (name!==clsEditOrigName && affected>0) ? 'block' : 'none';
+}
+function submitClsEdit(){
+  const id=parseInt(document.getElementById('clsEditId').value);
+  const newName=document.getElementById('clsEditName').value.trim();
+  const newType=document.getElementById('clsEditGroup').value;
+  if(!newName){alert('유형명을 입력하세요.');return;}
+  const dup=classifications.find(c=>c.name===newName&&c.id!==id);
+  if(dup){alert('이미 존재하는 유형명입니다.');return;}
+  const c=classifications.find(x=>x.id===id);
+  const oldName=c.name;
+  // 패턴 마이그레이션
+  patterns.forEach(p=>{if(p.cls===oldName){p.cls=newName; p.updated=today();}});
+  c.name=newName;
+  c.type=newType;
+  closeClsEditModal();
+  renderClsTable();
+  renderTable();
+}
+
+// ── 패턴 추가 모달 ────────────────────────────────────────
+function openAddModal(){
+  document.getElementById('addModal').classList.add('open');
+  const cls=document.getElementById('addClass');
+  cls.innerHTML='<option value="" disabled selected>패턴 유형</option>';
+  cls.disabled=true; cls.classList.add('ph');
+}
+function closeAddModal(){
+  document.getElementById('addModal').classList.remove('open');
+  document.getElementById('addPattern').value='';
+  document.getElementById('addNote').value='';
+  ['addType','addClass','addMatch','addStatus'].forEach(id=>{
+    const s=document.getElementById(id);s.selectedIndex=0;s.classList.add('ph');
+  });
+  document.getElementById('addClass').disabled=true;
+}
+function onGroupChange(){
+  const sel=document.getElementById('addType');
+  sel.classList.remove('ph');
+  const cls=document.getElementById('addClass');
+  const filtered=classifications.filter(c=>c.type===sel.value&&c.active);
+  cls.innerHTML='<option value="" disabled selected>패턴 유형</option>'
+    +filtered.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+  cls.disabled=false; cls.selectedIndex=0; cls.classList.add('ph');
+}
+function submitAdd(){
+  const pat=document.getElementById('addPattern').value.trim();
+  const type=document.getElementById('addType').value;
+  const cls=document.getElementById('addClass').value;
+  const match=document.getElementById('addMatch').value;
+  const status=document.getElementById('addStatus').value;
+  const note=document.getElementById('addNote').value.trim();
+  if(!pat){alert('패턴을 입력하세요.');return;}
+  if(!type){alert('패턴 그룹을 선택하세요.');return;}
+  if(!cls){alert('패턴 유형을 선택하세요.');return;}
+  if(!match){alert('매치 유형을 선택하세요.');return;}
+  if(!status){alert('활성화 여부를 선택하세요.');return;}
+  patterns.unshift({id:patNextId++,pattern:pat,type,cls,match,status,note,created:today(),updated:today()});
+  closeAddModal(); renderTable();
+}
+
+// ── 패턴 수정 모달 ────────────────────────────────────────
+function openEditModal(id){
+  const d=patterns.find(x=>x.id===id);if(!d)return;
+  document.getElementById('editId').value=id;
+  document.getElementById('editPattern').value=d.pattern;
+  document.getElementById('editType').value=d.type;
+  syncEditCls(); document.getElementById('editClass').value=d.cls;
+  document.getElementById('editMatch').value=d.match;
+  document.getElementById('editStatus').value=d.status;
+  document.getElementById('editNote').value=d.note;
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEditModal(){document.getElementById('editModal').classList.remove('open')}
+function syncEditCls(){
+  const type=document.getElementById('editType').value;
+  const sel=document.getElementById('editClass');
+  sel.innerHTML=classifications.filter(c=>c.type===type).map(c=>`<option value="${c.name}">${c.name}</option>`).join('');
+}
+function submitEdit(){
+  const id=parseInt(document.getElementById('editId').value);
+  const d=patterns.find(x=>x.id===id);if(!d)return;
+  d.pattern=document.getElementById('editPattern').value.trim();
+  d.type=document.getElementById('editType').value;
+  d.cls=document.getElementById('editClass').value;
+  d.match=document.getElementById('editMatch').value;
+  d.status=document.getElementById('editStatus').value;
+  d.note=document.getElementById('editNote').value.trim();
+  d.updated=today();
+  closeEditModal(); renderTable();
+}
+function delPattern(id){
+  if(!confirm('이 패턴을 삭제하시겠습니까?'))return;
+  patterns=patterns.filter(x=>x.id!==id); renderTable();
+}
+
+['addModal','editModal','clsEditModal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){
+    if(e.target===this)this.classList.remove('open');
+  });
+});
+
+renderTable();
+</script>
+</body>
+</html>
