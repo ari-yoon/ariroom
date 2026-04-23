@@ -1,0 +1,120 @@
+
+<div style="min-height:520px;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;border-radius:12px;padding:2rem 1rem;">
+<div style="background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;width:100%;max-width:640px;overflow:hidden;">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px 14px;border-bottom:1px solid #f1f5f9;">
+    <span style="font-size:15px;font-weight:500;color:#111827;">판매제한 해결 기록</span>
+    <button style="background:none;border:none;cursor:pointer;font-size:18px;color:#9ca3af;line-height:1;padding:0;">✕</button>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed;">
+      <colgroup>
+        <col style="width:130px">
+        <col style="width:110px">
+        <col style="width:auto">
+        <col style="width:110px">
+        <col style="width:48px">
+      </colgroup>
+      <thead>
+        <tr style="background:#f8fafc;">
+          <th style="padding:10px 14px;font-weight:500;color:#6b7280;text-align:center;border-bottom:1px solid #f1f5f9;">기록일자</th>
+          <th style="padding:10px 14px;font-weight:500;color:#6b7280;text-align:center;border-bottom:1px solid #f1f5f9;">해제 사유</th>
+          <th style="padding:10px 14px;font-weight:500;color:#6b7280;text-align:center;border-bottom:1px solid #f1f5f9;">내용</th>
+          <th style="padding:10px 14px;font-weight:500;color:#6b7280;text-align:center;border-bottom:1px solid #f1f5f9;">작성자</th>
+          <th style="padding:10px 14px;font-weight:500;color:#6b7280;text-align:center;border-bottom:1px solid #f1f5f9;">삭제</th>
+        </tr>
+      </thead>
+      <tbody id="record-body"></tbody>
+    </table>
+  </div>
+
+  <div style="padding:14px 16px 16px;border-top:1px solid #f1f5f9;">
+    <div style="margin-bottom:10px;">
+      <label style="display:block;font-size:12px;color:#6b7280;margin-bottom:5px;font-weight:500;">해제 사유</label>
+      <select id="reason-select" onchange="checkForm()" style="width:100%;height:36px;font-size:13px;padding:0 10px;border:1px solid #e2e8f0;border-radius:8px;background:#ffffff;color:#111827;cursor:pointer;">
+        <option value="" disabled selected>해제 사유를 선택해주세요</option>
+        <option value="오탐지">오탐지</option>
+        <option value="회피의도없음">회피의도없음</option>
+        <option value="오제재해결">오제재해결</option>
+        <option value="중복제재해결">중복제재해결</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input id="memo-input" type="text" placeholder="상세 해제 사유를 입력해 주세요." oninput="checkForm()" style="flex:1;height:36px;font-size:13px;padding:0 12px;border:1px solid #e2e8f0;border-radius:8px;background:#ffffff;color:#111827;outline:none;" />
+      <button id="record-btn" onclick="addRecord()" disabled style="height:36px;padding:0 18px;background:#94a3b8;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:not-allowed;white-space:nowrap;transition:background 0.15s;">기록</button>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;gap:8px;padding:0 16px 16px;">
+    <button style="height:36px;padding:0 20px;background:#ffffff;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;color:#374151;cursor:pointer;">닫기</button>
+    <button id="resolve-btn" style="height:36px;padding:0 20px;background:#3b82f6;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">해결하기</button>
+  </div>
+
+</div>
+</div>
+
+<script>
+let records = [
+  { date: "2026-01-08\n17:46:22", reason: "회피의도없음", content: "제주도로 배송비 변경 필요하여 거래 취소 확인", author: "BJm301_홍다인" }
+];
+
+function checkForm() {
+  const reason = document.getElementById("reason-select").value;
+  const memo = document.getElementById("memo-input").value.trim();
+  const btn = document.getElementById("record-btn");
+  const active = reason && memo;
+  btn.disabled = !active;
+  btn.style.background = active ? "#3b82f6" : "#94a3b8";
+  btn.style.cursor = active ? "pointer" : "not-allowed";
+}
+
+function renderTable() {
+  const tbody = document.getElementById("record-body");
+  if (records.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px 0;color:#9ca3af;font-size:13px;"><div style="font-size:28px;margin-bottom:6px;opacity:0.3;">📭</div>데이터 없음</td></tr>`;
+    document.getElementById("resolve-btn").textContent = "해결하기";
+    document.getElementById("resolve-btn").style.background = "#3b82f6";
+    return;
+  }
+  let rows = records.map((r, i) => {
+    const dateLines = r.date.split("\n");
+    return `<tr style="border-bottom:1px solid #f1f5f9;">
+      <td style="padding:10px 14px;text-align:center;color:#6b7280;font-size:12px;line-height:1.5;">${dateLines[0]}<br>${dateLines[1]}</td>
+      <td style="padding:10px 14px;text-align:center;color:#111827;font-size:13px;">${r.reason}</td>
+      <td style="padding:10px 14px;color:#111827;font-size:13px;">${r.content}</td>
+      <td style="padding:10px 14px;text-align:center;color:#6b7280;font-size:12px;">${r.author}</td>
+      <td style="padding:10px 14px;text-align:center;">
+        <button onclick="deleteRecord(${i})" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:15px;padding:2px 4px;">🗑</button>
+      </td>
+    </tr>`;
+  }).join("");
+
+  const nav = `<tr><td colspan="5" style="text-align:right;padding:6px 12px;"><span style="font-size:12px;color:#9ca3af;cursor:pointer;">◀</span><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px;background:#3b82f6;color:#fff;font-size:12px;margin:0 4px;">1</span><span style="font-size:12px;color:#9ca3af;cursor:pointer;">▶</span></td></tr>`;
+  tbody.innerHTML = rows + nav;
+
+  document.getElementById("resolve-btn").textContent = "되돌리기";
+  document.getElementById("resolve-btn").style.background = "#ef4444";
+}
+
+function addRecord() {
+  const reason = document.getElementById("reason-select").value;
+  const memo = document.getElementById("memo-input").value.trim();
+  if (!reason || !memo) return;
+  const now = new Date();
+  const pad = n => String(n).padStart(2,"0");
+  const dateStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}\n${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  records.push({ date: dateStr, reason, content: memo, author: "관리자" });
+  document.getElementById("memo-input").value = "";
+  document.getElementById("reason-select").value = "";
+  checkForm();
+  renderTable();
+}
+
+function deleteRecord(i) {
+  records.splice(i, 1);
+  renderTable();
+}
+
+renderTable();
+</script>
